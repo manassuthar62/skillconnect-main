@@ -146,7 +146,7 @@ export default function NotificationsPage() {
   const fmtTime  = ts => ts ? new Date(ts).toLocaleDateString([], { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
 
   const StatusBadge = ({ status }) => {
-    if (status === 'accepted') return <span style={{ color: '#25D366', fontSize: 12, fontWeight: 600 }}>✅ Connected</span>;
+    if (status === 'accepted') return <span style={{ color: '#2563eb', fontSize: 12, fontWeight: 600 }}>✅ Connected</span>;
     if (status === 'rejected') return <span style={{ color: 'var(--t3)', fontSize: 12 }}>✖ Rejected</span>;
     return <span style={{ color: '#f59e0b', fontSize: 12, display: 'flex', alignItems: 'center', gap: 4 }}><Clock size={11} /> Pending</span>;
   };

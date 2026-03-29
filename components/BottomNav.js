@@ -86,7 +86,7 @@ export default function BottomNav() {
             height: 48,
             borderRadius: 16,
             position: 'relative',
-            background: active ? 'rgba(47,125,50,0.12)' : 'transparent',
+            background: active ? 'rgba(37,99,235,0.12)' : 'transparent',
             transition: 'background 0.2s, transform 0.2s',
             transform: active ? 'translateY(-1px)' : 'none',
           }}>
@@ -94,7 +94,7 @@ export default function BottomNav() {
               size={22}
               color={active ? 'var(--accent)' : 'var(--t3)'}
               strokeWidth={active ? 2.5 : 1.8}
-              fill={active ? 'rgba(47,125,50,0.12)' : 'none'}
+              fill={active ? 'rgba(37,99,235,0.12)' : 'none'}
               style={{ transition: 'color 0.2s' }}
             />
             {badge > 0 && (

@@ -102,7 +102,7 @@ export default function CallScreen({
           }
           .call-btn:hover { transform: scale(1.05); }
           .call-btn.decline { background: #ef4444; }
-          .call-btn.answer { background: #22c55e; }
+          .call-btn.answer { background: #2563eb; }
         `}</style>
       </div>
     );

@@ -76,7 +76,7 @@ export default function TopBar() {
       {/* Left — Logo */}
       <Link href="/chat" className={styles.logoLink}>
         <div className={styles.logoIcon}>
-          <Zap size={15} fill="#25D366" color="#25D366" />
+          <Zap size={15} fill="#2563eb" color="#2563eb" />
         </div>
         <span className={styles.logoText}>SkillConnect</span>
       </Link>

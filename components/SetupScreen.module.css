@@ -16,7 +16,7 @@
   pointer-events: none;
   opacity: 0.3;
 }
-.blob1 { width: 400px; height: 400px; background: radial-gradient(circle, #25D366, transparent); top: -100px; left: -100px; }
+.blob1 { width: 400px; height: 400px; background: radial-gradient(circle, #2563eb, transparent); top: -100px; left: -100px; }
 .blob2 { width: 350px; height: 350px; background: radial-gradient(circle, #7c3aed, transparent); bottom: -80px; right: -80px; }
 
 .card {

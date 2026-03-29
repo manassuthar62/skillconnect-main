@@ -30,3 +30,13 @@
  ✓ Compiled /notifications in 1237ms (1608 modules)
  ○ Compiling /profile ...
  ✓ Compiled /profile in 2.3s (1637 modules)
+ ○ Compiling /api/push/subscribe ...
+ ✓ Compiled /api/push/subscribe in 333.7s (1631 modules)
+ POST /api/push/subscribe 200 in 45457ms
+ GET /auth 200 in 70032ms
+ POST /api/push/subscribe 200 in 1122ms
+ POST /api/push/subscribe 200 in 1175ms
+ POST /api/push/subscribe 200 in 1224ms
+ POST /api/push/subscribe 200 in 1252ms
+ HEAD / 200 in 596ms
+ POST /api/push/subscribe 200 in 871ms

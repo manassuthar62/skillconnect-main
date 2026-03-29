@@ -31,7 +31,7 @@ export default function SetupScreen() {
 
       <div className={styles.card}>
         <div className={styles.logo}>
-          <div className={styles.logoIcon}><Zap size={28} fill="#25D366" color="#25D366" /></div>
+          <div className={styles.logoIcon}><Zap size={28} fill="#2563eb" color="#2563eb" /></div>
           <div>
             <h1 className={styles.title}>SkillConnect</h1>
             <p className={styles.sub}>Supabase setup required</p>

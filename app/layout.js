@@ -11,7 +11,7 @@ export const metadata = {
 };
 
 export const viewport = {
-  themeColor: '#25D366',
+  themeColor: '#2563eb',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
@@ -24,7 +24,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <head>
         <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#25D366" />
+        <meta name="theme-color" content="#2563eb" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="SkillConnect" />
@@ -45,7 +45,7 @@ export default function RootLayout({ children }) {
                   borderRadius: '10px',
                   fontSize: '14px',
                 },
-                success: { iconTheme: { primary: '#25D366', secondary: '#000' } },
+                success: { iconTheme: { primary: '#2563eb', secondary: '#fff' } },
               }}
             />
           </CallProvider>

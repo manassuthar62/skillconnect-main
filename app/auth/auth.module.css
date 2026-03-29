@@ -22,8 +22,8 @@
   overflow: hidden;
   background:
     linear-gradient(135deg, rgba(255,255,255,0.82), rgba(244,249,241,0.94)),
-    radial-gradient(circle at right top, rgba(47,125,50,0.18), transparent 32%);
-  border: 1px solid rgba(47,125,50,0.1);
+    radial-gradient(circle at right top, rgba(37,99,235,0.18), transparent 32%);
+  border: 1px solid rgba(37,99,235,0.1);
   border-radius: 32px;
   box-shadow: var(--shadow-lg);
 }
@@ -33,7 +33,7 @@
   position: absolute;
   width: 440px; height: 440px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(47,125,50,0.14), transparent 70%);
+  background: radial-gradient(circle, rgba(37,99,235,0.14), transparent 70%);
   top: -160px; right: -120px;
   pointer-events: none;
 }
@@ -43,7 +43,7 @@
   width: 260px;
   height: 260px;
   border-radius: 32px;
-  background: linear-gradient(135deg, rgba(47,125,50,0.08), rgba(47,125,50,0.01));
+  background: linear-gradient(135deg, rgba(37,99,235,0.08), rgba(37,99,235,0.01));
   bottom: -70px; left: -70px;
   transform: rotate(18deg);
   pointer-events: none;
@@ -62,10 +62,10 @@
   width: 72px;
   height: 72px;
   background: linear-gradient(135deg, #ffffff, #edf7eb);
-  border: 1px solid rgba(47,125,50,0.18);
+  border: 1px solid rgba(37,99,235,0.18);
   border-radius: 22px;
   display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 18px 38px rgba(47,125,50,0.12);
+  box-shadow: 0 18px 38px rgba(37,99,235,0.12);
 }
 
 .appName {
@@ -95,7 +95,7 @@
   flex-direction: column;
   gap: 20px;
   box-shadow: var(--shadow-lg);
-  border: 1px solid rgba(47,125,50,0.12);
+  border: 1px solid rgba(37,99,235,0.12);
   position: relative;
   z-index: 2;
   overflow: hidden;
@@ -152,7 +152,7 @@
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
   color: #fff;
   font-weight: 700;
-  box-shadow: 0 10px 22px rgba(47,125,50,0.18);
+  box-shadow: 0 10px 22px rgba(37,99,235,0.18);
 }
 
 /* Google button */
@@ -168,7 +168,7 @@
 }
 .googleBtn:hover {
   background: #edf6ea;
-  border-color: rgba(47,125,50,0.18);
+  border-color: rgba(37,99,235,0.18);
   transform: translateY(-1px);
 }
 .googleBtn:disabled { opacity: 0.5; cursor: not-allowed; }

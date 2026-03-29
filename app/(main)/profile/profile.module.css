@@ -56,7 +56,7 @@
   border-radius: 50%;
   border: 3px solid var(--accent);
   padding: 2px;
-  box-shadow: 0 14px 30px rgba(47,125,50,0.14);
+  box-shadow: 0 14px 30px rgba(37,99,235,0.14);
   overflow: hidden;
   position: relative;
 }

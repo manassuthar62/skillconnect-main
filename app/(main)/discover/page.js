@@ -396,7 +396,7 @@ export default function DiscoverPage() {
                       </div>
                     )}
                     {user.preferred_exchange && (
-                      <div style={{ background: 'rgba(22, 163, 74, 0.15)', color: '#16a34a', padding: '4px 8px', borderRadius: 6, fontSize: 11, fontWeight: 700, marginTop: 4 }}>
+                      <div style={{ background: 'rgba(37, 99, 235, 0.15)', color: '#2563eb', padding: '4px 8px', borderRadius: 6, fontSize: 11, fontWeight: 700, marginTop: 4 }}>
                         {user.preferred_exchange}
                       </div>
                     )}
