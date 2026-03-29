@@ -8,7 +8,7 @@ import { sendPushNotification } from '@/lib/pushClient';
 import UserAvatar from '@/components/UserAvatar';
 import { 
   ArrowLeft, Send, Phone, Video, MoreVertical, Search as SearchIcon, X,
-  Info, CheckSquare, BellOff, Timer, Lock, Heart, FileText, XCircle, ThumbsDown, Ban, MinusCircle, Trash2
+  Info, CheckSquare, BellOff, Timer, Lock, Heart, FileText, XCircle, ThumbsDown, Ban, MinusCircle, Trash2, Sparkles
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-hot-toast';
@@ -45,6 +45,8 @@ export default function ChatRoomPage() {
   const [showMenu,  setShowMenu]  = useState(false);
   const [isOtherOnline, setIsOtherOnline] = useState(false);
   const [isOtherTyping, setIsOtherTyping] = useState(false);
+  const [isRewriting, setIsRewriting] = useState(false);
+  const [smartReplies, setSmartReplies] = useState([]);
   const bottomRef = useRef(null);
   const menuRef   = useRef(null);
   const typingTimeoutRef = useRef(null);
@@ -52,8 +54,14 @@ export default function ChatRoomPage() {
   const onlineTimeoutRef = useRef(null);
   const heartbeatRef = useRef(null);
   const router    = useRouter();
-  const chatId    = getChatId(currentUser?.id, userId);
+  const chatId = (currentUser?.id && userId) ? getChatId(currentUser.id, userId) : null;
   const publicProfileHref = `/u/${otherUser?.username || userId}`;
+
+  console.log('--- ChatRoom Render ---', { 
+    currentUserId: currentUser?.id, 
+    targetUserId: userId, 
+    chatId: chatId 
+  });
 
   useEffect(() => {
     if (!userId) return;
@@ -118,45 +126,31 @@ export default function ChatRoomPage() {
   useEffect(() => {
     if (!currentUser || !userId) return;
     const sb = getSupabase();
-    const presenceChannel = sb.channel(`chat-presence:${chatId}`);
-
-    typingChannelRef.current = presenceChannel;
+    const presenceChannel = sb.channel(`chat-presence:${chatId}`, {
+      config: { presence: { key: currentUser.id } },
+    });
 
     presenceChannel
-      .on('broadcast', { event: 'presence_ping' }, ({ payload }) => {
-        if (payload?.from !== userId) return;
-        setIsOtherOnline(true);
-        if (onlineTimeoutRef.current) clearTimeout(onlineTimeoutRef.current);
-        onlineTimeoutRef.current = setTimeout(() => setIsOtherOnline(false), 15000);
-      })
-      .on('broadcast', { event: 'typing_state' }, ({ payload }) => {
-        if (payload?.from !== userId) return;
-        setIsOtherTyping(Boolean(payload?.typing));
-        if (payload?.typing) {
-          setIsOtherOnline(true);
-          if (onlineTimeoutRef.current) clearTimeout(onlineTimeoutRef.current);
-          onlineTimeoutRef.current = setTimeout(() => setIsOtherOnline(false), 15000);
-        }
+      .on('presence', { event: 'sync' }, () => {
+        const state = presenceChannel.presenceState();
+        console.log('Presence Sync State:', state);
+        const otherUserSessions = state[userId] || [];
+        console.log('Other user sessions:', otherUserSessions);
+        setIsOtherOnline(otherUserSessions.length > 0);
+        setIsOtherTyping(otherUserSessions.some(session => session.typing));
       })
       .subscribe(async (status) => {
+        console.log('Presence Channel Status:', status);
         if (status === 'SUBSCRIBED') {
-          const ping = () => {
-            presenceChannel.send({
-              type: 'broadcast',
-              event: 'presence_ping',
-              payload: { from: currentUser.id, at: new Date().toISOString() },
-            });
-          };
-
-          ping();
-          heartbeatRef.current = setInterval(ping, 5000);
+          console.log('Tracking presence for:', currentUser.id);
+          await presenceChannel.track({ online_at: new Date().toISOString(), typing: false });
         }
       });
 
+    typingChannelRef.current = presenceChannel;
+
     return () => {
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-      if (onlineTimeoutRef.current) clearTimeout(onlineTimeoutRef.current);
-      if (heartbeatRef.current) clearInterval(heartbeatRef.current);
       typingChannelRef.current = null;
       setIsOtherOnline(false);
       setIsOtherTyping(false);
@@ -167,22 +161,50 @@ export default function ChatRoomPage() {
   const updateTypingState = async (typing) => {
     if (!typingChannelRef.current) return;
     try {
-      await typingChannelRef.current.send({
-        type: 'broadcast',
-        event: 'typing_state',
-        payload: {
-          from: currentUser?.id,
-          typing,
-          at: new Date().toISOString(),
-        },
+      await typingChannelRef.current.track({
+        online_at: new Date().toISOString(),
+        typing: typing,
       });
     } catch (error) {
-      console.error('Typing presence error:', error);
+      console.error('Presence track error:', error);
     }
   };
 
+  useEffect(() => {
+    if (messages.length === 0 || !currentUser) return;
+    const lastMsg = messages[messages.length - 1];
+    
+    if (lastMsg.sender_id === currentUser.id) {
+       setSmartReplies([]);
+       return;
+    }
+    
+    if (isOtherTyping || smartReplies.length > 0) return;
+
+    const fetchReplies = async () => {
+      try {
+        const recent = messages.slice(-5).map(m => ({
+          role: m.sender_id === currentUser.id ? 'me' : 'them',
+          text: m.text
+        }));
+        
+        const res = await fetch('/api/ai/chat-assistant', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ mode: 'suggest_replies', recentMessages: recent })
+        });
+        const data = await res.json();
+        if (data.result) setSmartReplies(data.result);
+      } catch (err) { console.error(err); }
+    };
+    
+    const timer = setTimeout(fetchReplies, 1500);
+    return () => clearTimeout(timer);
+  }, [messages, currentUser, isOtherTyping]);
+
   const handleTextChange = (value) => {
     setText(value);
+    setSmartReplies([]);
     updateTypingState(Boolean(value.trim()));
 
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
@@ -216,6 +238,25 @@ export default function ChatRoomPage() {
 
     // Auto-scroll after sending
     setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
+  };
+
+  const handleRewrite = async () => {
+    if (!text.trim() || isRewriting) return;
+    try {
+      setIsRewriting(true);
+      const res = await fetch('/api/ai/chat-assistant', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode: 'rewrite', text: text.trim() })
+      });
+      const data = await res.json();
+      if (data.result) setText(data.result);
+      else toast.error(data.error || 'Failed to rewrite text');
+    } catch (err) {
+      toast.error('AI Error');
+    } finally {
+      setIsRewriting(false);
+    }
   };
 
   const handleNotImplemented = () => { 
@@ -255,7 +296,9 @@ export default function ChatRoomPage() {
         </div>
         <div className="wa-chat-header-info" onClick={() => router.push(publicProfileHref)} style={{ cursor: 'pointer' }}>
           <div className="wa-chat-header-name">{otherUser?.name || 'Loading...'}</div>
-          <div className="wa-chat-header-status">{isOtherTyping ? 'typing...' : isOtherOnline ? 'online' : 'offline'}</div>
+          <div className="wa-chat-header-status" style={{ color: isOtherOnline ? '#4ade80' : '#ff4444' }}>
+            {isOtherTyping ? '⌨️ TYPING...' : isOtherOnline ? '🟢 ONLINE NOW' : '🔴 OFFLINE'}
+          </div>
         </div>
         <div style={{ display: 'flex', gap: 2, alignItems: 'center', position: 'relative' }}>
           <button className="wa-icon-btn" onClick={() => startCall('video', userId)}><Video size={20} /></button>
@@ -387,12 +430,43 @@ export default function ChatRoomPage() {
         <div ref={bottomRef} />
       </div>
 
+      <AnimatePresence>
+        {smartReplies.length > 0 && (
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
+            style={{ 
+              display: 'flex', gap: 8, padding: '8px 16px', overflowX: 'auto', 
+              WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', background: 'var(--surface)'
+            }}
+          >
+            {smartReplies.map((reply, i) => (
+              <button 
+                key={i} 
+                onClick={() => { setText(reply); handleTextChange(reply); }}
+                style={{
+                  background: 'var(--surface-3)', color: 'var(--t1)', border: '1px solid rgba(255,255,255,0.1)',
+                  padding: '6px 12px', borderRadius: 16, fontSize: 13, whiteSpace: 'nowrap',
+                  cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6
+                }}
+              >
+                <Sparkles size={12} color="var(--accent)" /> {reply}
+              </button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="wa-chat-input-area">
         <textarea className="wa-chat-input" rows={1} placeholder="Message"
           value={text}
           onChange={e => handleTextChange(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
         />
+        {text.trim() && (
+          <button className="wa-icon-btn" onClick={handleRewrite} disabled={isRewriting} title="Fix Grammar/Tone" style={{ margin: '0 4px', opacity: isRewriting ? 0.5 : 1 }}>
+            {isRewriting ? <span className="spinner" style={{ width: 18, height: 18, borderTopColor: 'var(--accent)' }} /> : <Sparkles size={20} color="var(--accent)" />}
+          </button>
+        )}
         <motion.button className="wa-send-btn" onClick={sendMessage}
           disabled={!text.trim() || sending} whileTap={{ scale: 0.9 }}>
           {sending ? <span className="spinner" style={{ width: 18, height: 18 }} /> : <Send size={20} />}
