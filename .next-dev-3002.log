@@ -1,0 +1,32 @@
+
+> skillconnect@0.1.0 dev
+> next dev --port 3002
+
+  ▲ Next.js 14.2.3
+  - Local:        http://localhost:3002
+  - Environments: .env.local
+
+ ✓ Starting...
+ ○ (pwa) PWA support is disabled.
+ ✓ Ready in 13.2s
+ ○ Compiling / ...
+ ✓ Compiled / in 20.9s (642 modules)
+ HEAD / 200 in 8906ms
+ GET / 200 in 8098ms
+ GET / 200 in 24757ms
+ ○ Compiling /auth ...
+ ✓ Compiled /auth in 41.2s (1362 modules)
+ GET / 200 in 702ms
+ ○ Compiling /chat ...
+ ✓ Compiled /chat in 3.3s (1456 modules)
+ ○ Compiling /api/push/subscribe ...
+ ✓ Compiled /api/push/subscribe in 2.7s (821 modules)
+ POST /api/push/subscribe 200 in 3706ms
+ ○ Compiling /discover ...
+ ✓ Compiled /discover in 1376ms (1582 modules)
+ ○ Compiling /community ...
+ ✓ Compiled /community in 1592ms (1595 modules)
+ ○ Compiling /notifications ...
+ ✓ Compiled /notifications in 1237ms (1608 modules)
+ ○ Compiling /profile ...
+ ✓ Compiled /profile in 2.3s (1637 modules)

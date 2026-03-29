@@ -1,0 +1,212 @@
+.header {
+  height: 60px;
+  background: var(--glass);
+  border-bottom: 1px solid var(--b1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 18px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+/* Logo */
+.logoLink {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+}
+
+.logoIcon {
+  width: 34px;
+  height: 34px;
+  background: linear-gradient(135deg, rgba(47,125,50,0.14), rgba(47,125,50,0.06));
+  border: 1px solid rgba(47,125,50,0.18);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logoText {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--t1);
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, #17311b, #2f7d32);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Right actions */
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Install Button */
+.installBtn {
+  background: rgba(255,255,255,0.76);
+  border: 1px solid var(--b1);
+  color: var(--t1);
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.installBtn:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* Avatar */
+.avatarContainer {
+  position: relative;
+}
+
+.avatarButton {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: opacity 0.2s;
+}
+
+.avatarButton:hover { opacity: 0.85; }
+
+.avatar {
+  border: 2px solid rgba(47,125,50,0.2) !important;
+  border-radius: 50% !important;
+  box-shadow: 0 4px 14px rgba(23,49,27,0.12);
+}
+
+.onlineDot {
+  position: absolute;
+  bottom: 1px;
+  right: 1px;
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+  border: 2px solid var(--surface);
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.92);
+}
+
+/* Dropdown */
+.dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 190px;
+  background: rgba(255,255,255,0.96);
+  border: 1px solid var(--b1);
+  border-radius: 16px;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  z-index: 100;
+  animation: dropIn 0.15s ease-out;
+}
+
+@keyframes dropIn {
+  from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.dropdownHeader {
+  padding: 14px 16px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dropdownName {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--t1);
+}
+
+.dropdownUsername {
+  font-size: 12px;
+  color: var(--t3);
+}
+
+.dropdownDivider {
+  height: 1px;
+  background: var(--b1);
+  margin: 0 10px;
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--t1);
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s;
+  width: 100%;
+  text-decoration: none;
+}
+
+.menuItem:hover { background: var(--surface-3); }
+
+.menuItemLogout { color: #f87171; }
+.menuItemLogout:hover { background: rgba(239, 68, 68, 0.08); }
+
+@media (max-width: 768px) {
+  .header {
+    height: 56px;
+    padding: 0 12px;
+  }
+
+  .logoText {
+    font-size: 16px;
+  }
+
+  .logoIcon {
+    width: 30px;
+    height: 30px;
+    border-radius: 10px;
+  }
+
+  .actions {
+    gap: 8px;
+  }
+
+  .installBtn {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+  }
+
+  .dropdown {
+    width: min(210px, calc(100vw - 24px));
+    right: -4px;
+  }
+}
+
+@media (max-width: 480px) {
+  .logoText {
+    font-size: 15px;
+  }
+}

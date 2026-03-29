@@ -1,0 +1,190 @@
+
+> skillconnect@0.1.0 dev
+> next dev
+
+  ▲ Next.js 14.2.3
+  - Local:        http://localhost:3000
+  - Environments: .env.local
+
+ ✓ Starting...
+ ○ (pwa) PWA support is disabled.
+ ✓ Ready in 11.8s
+ ○ Compiling /notifications ...
+ ✓ Compiled /notifications in 32.7s (1459 modules)
+ GET /notifications 200 in 12867ms
+ GET /notifications 200 in 1917ms
+ ○ Compiling / ...
+ ✓ Compiled /api/push/subscribe in 22.5s (1526 modules)
+ GET / 200 in 23232ms
+ POST /api/push/subscribe 200 in 13970ms
+ POST /api/push/subscribe 200 in 13811ms
+ POST /api/push/subscribe 200 in 13900ms
+ POST /api/push/subscribe 200 in 9523ms
+ POST /api/push/subscribe 200 in 13996ms
+ POST /api/push/subscribe 200 in 1210ms
+ POST /api/push/subscribe 200 in 1243ms
+ POST /api/push/subscribe 200 in 1417ms
+ POST /api/push/subscribe 200 in 1531ms
+ POST /api/push/subscribe 200 in 1894ms
+ ○ Compiling /chat ...
+ ✓ Compiled /chat in 792ms (1549 modules)
+ ○ Compiling /profile ...
+ ✓ Compiled /profile in 1220ms (1580 modules)
+ ○ Compiling /chat/[userId] ...
+ ✓ Compiled /chat/[userId] in 3.1s (1502 modules)
+ ○ Compiling /discover ...
+ ✓ Compiled /discover in 3.7s (1539 modules)
+ ○ Compiling /api/push/subscribe ...
+ ✓ Compiled /api/push/subscribe in 1669ms (869 modules)
+ POST /api/push/subscribe 200 in 2454ms
+ POST /api/push/subscribe 200 in 1756ms
+ ○ Compiling /community ...
+ ✓ Compiled /community in 5.3s (1638 modules)
+ POST /api/push/subscribe 200 in 321ms
+ POST /api/push/subscribe 200 in 617ms
+ POST /api/push/subscribe 200 in 538ms
+ POST /api/push/subscribe 200 in 480ms
+ POST /api/push/subscribe 200 in 1137ms
+ POST /api/push/subscribe 200 in 746ms
+ POST /api/push/subscribe 200 in 985ms
+ POST /api/push/subscribe 200 in 767ms
+ POST /api/push/subscribe 200 in 652ms
+ ○ Compiling /discover ...
+ ✓ Compiled /discover in 4.9s (875 modules)
+ POST /api/push/subscribe 200 in 408ms
+ POST /api/push/subscribe 200 in 785ms
+ GET /discover 200 in 2431ms
+ POST /api/push/subscribe 200 in 244ms
+ POST /api/push/subscribe 200 in 363ms
+ POST /api/push/subscribe 200 in 600ms
+ POST /api/push/subscribe 200 in 631ms
+ POST /api/push/subscribe 200 in 670ms
+ POST /api/push/subscribe 200 in 923ms
+ POST /api/push/subscribe 200 in 1318ms
+ ✓ Compiled in 5.5s (1621 modules)
+ ○ Compiling /u/[id] ...
+ POST /api/push/subscribe 200 in 1040ms
+ POST /api/push/subscribe 200 in 1055ms
+ ✓ Compiled /u/[id] in 12.6s (1630 modules)
+ ○ Compiling /chat/[userId] ...
+ ✓ Compiled /chat/[userId] in 3.2s (876 modules)
+ ✓ Compiled in 6.7s (1521 modules)
+ ○ Compiling /api/push/subscribe ...
+ ✓ Compiled /api/push/subscribe in 1345ms (853 modules)
+ POST /api/push/subscribe 200 in 5317ms
+ ○ Compiling /api/push/send ...
+ ✓ Compiled /api/push/send in 899ms (855 modules)
+ POST /api/push/send 200 in 1776ms
+ POST /api/push/subscribe 200 in 940ms
+ POST /api/push/subscribe 200 in 553ms
+ ○ Compiling /community ...
+ ✓ Compiled /community in 1000ms (860 modules)
+ POST /api/push/subscribe 200 in 179ms
+ POST /api/push/subscribe 200 in 663ms
+ ○ Compiling /api/push/send ...
+ ✓ Compiled /api/push/send in 686ms (862 modules)
+ POST /api/push/send 200 in 1594ms
+ POST /api/push/subscribe 200 in 303ms
+ POST /api/push/subscribe 200 in 754ms
+ POST /api/push/subscribe 200 in 803ms
+ POST /api/push/subscribe 200 in 1154ms
+ POST /api/push/subscribe 200 in 1467ms
+ POST /api/push/subscribe 200 in 544ms
+ POST /api/push/subscribe 200 in 427ms
+ POST /api/push/subscribe 200 in 329ms
+ POST /api/push/subscribe 200 in 639ms
+ POST /api/push/subscribe 200 in 206ms
+ ○ Compiling /auth ...
+ ✓ Compiled /auth in 50.1s (1651 modules)
+ ✓ Compiled in 21.7s (1541 modules)
+ ✓ Compiled in 4s (779 modules)
+ ✓ Compiled in 4.1s (1541 modules)
+ ✓ Compiled in 8.2s (1541 modules)
+ ○ Compiling /api/push/subscribe ...
+ ✓ Compiled /api/push/subscribe in 10.3s (853 modules)
+ POST /api/push/subscribe 200 in 14552ms
+ POST /api/push/subscribe 200 in 18285ms
+ POST /api/push/subscribe 200 in 365ms
+ POST /api/push/subscribe 200 in 878ms
+ POST /api/push/subscribe 200 in 507ms
+ POST /api/push/subscribe 200 in 683ms
+ ○ Compiling /api/push/send ...
+ ✓ Compiled /api/push/send in 2s (855 modules)
+ POST /api/push/send 200 in 2511ms
+ POST /api/push/subscribe 200 in 5632ms
+ POST /api/push/subscribe 200 in 665ms
+ ○ Compiling /chat/[userId] ...
+ ✓ Compiled /chat/[userId] in 42.5s (869 modules)
+ POST /api/push/subscribe 200 in 24572ms
+ POST /api/push/subscribe 200 in 24205ms
+ ○ Compiling /api/push/send ...
+ ✓ Compiled /api/push/send in 811ms (863 modules)
+ POST /api/push/send 200 in 1894ms
+ POST /api/push/subscribe 200 in 1027ms
+ POST /api/push/subscribe 200 in 1156ms
+ POST /api/push/subscribe 200 in 682ms
+ POST /api/push/subscribe 200 in 1272ms
+ ✓ Compiled in 13.7s (1640 modules)
+ POST /api/push/subscribe 200 in 404ms
+ POST /api/push/subscribe 200 in 211ms
+ POST /api/push/subscribe 200 in 415ms
+ POST /api/push/subscribe 200 in 433ms
+ POST /api/push/subscribe 200 in 718ms
+ POST /api/push/subscribe 200 in 85ms
+ POST /api/push/subscribe 200 in 92ms
+ POST /api/push/subscribe 200 in 96ms
+ POST /api/push/subscribe 200 in 988ms
+ POST /api/push/subscribe 200 in 853ms
+ ○ Compiling /api/push/send ...
+ ✓ Compiled /api/push/send in 4s (863 modules)
+ POST /api/push/send 200 in 6916ms
+ POST /api/push/subscribe 200 in 788ms
+ POST /api/push/subscribe 200 in 738ms
+ POST /api/push/subscribe 200 in 610ms
+ POST /api/push/subscribe 200 in 926ms
+ POST /api/push/subscribe 200 in 615ms
+ POST /api/push/subscribe 200 in 592ms
+ GET /chat/2754a306-f0f8-41f4-8411-348b90c0dbc8 200 in 3541ms
+ POST /api/push/subscribe 200 in 674ms
+ POST /api/push/subscribe 200 in 201ms
+ POST /api/push/subscribe 200 in 951ms
+ POST /api/push/subscribe 200 in 969ms
+ POST /api/push/subscribe 200 in 979ms
+ POST /api/push/subscribe 200 in 739ms
+ POST /api/push/subscribe 200 in 189ms
+ POST /api/push/subscribe 200 in 1701ms
+ POST /api/push/subscribe 200 in 1616ms
+ POST /api/push/subscribe 200 in 1219ms
+ POST /api/push/subscribe 200 in 279ms
+ POST /api/push/subscribe 200 in 208ms
+ POST /api/push/subscribe 200 in 1052ms
+ POST /api/push/subscribe 200 in 1121ms
+ POST /api/push/subscribe 200 in 776ms
+ POST /api/push/subscribe 200 in 821ms
+ POST /api/push/subscribe 200 in 89ms
+ POST /api/push/subscribe 200 in 81ms
+ ✓ Compiled in 10.2s (1640 modules)
+ POST /api/push/subscribe 200 in 242ms
+ POST /api/push/subscribe 200 in 1358ms
+ GET /chat/2754a306-f0f8-41f4-8411-348b90c0dbc8 200 in 11833ms
+ POST /api/push/subscribe 200 in 806ms
+ POST /api/push/subscribe 200 in 850ms
+ POST /api/push/subscribe 200 in 934ms
+ POST /api/push/subscribe 200 in 946ms
+ POST /api/push/subscribe 200 in 914ms
+ POST /api/push/subscribe 200 in 306ms
+ POST /api/push/subscribe 200 in 536ms
+ POST /api/push/subscribe 200 in 193ms
+ POST /api/push/subscribe 200 in 891ms
+ ○ Compiling /api/push/send ...
+ ✓ Compiled /api/push/send in 2.9s (863 modules)
+ POST /api/push/send 200 in 3335ms
+ POST /api/push/subscribe 200 in 301ms
+ POST /api/push/subscribe 200 in 688ms
+ POST /api/push/subscribe 200 in 660ms
+ POST /api/push/subscribe 200 in 761ms
+ POST /api/push/subscribe 200 in 1379ms
+ POST /api/push/subscribe 200 in 439ms
+ POST /api/push/subscribe 200 in 1006ms
+ POST /api/push/subscribe 200 in 898ms
+ POST /api/push/subscribe 200 in 313ms

@@ -1,0 +1,2 @@
+/* Minimal overrides — main styles in globals.css */
+.list { flex: 1; overflow-y: auto; }
