@@ -77,11 +77,18 @@ export const CallProvider = ({ children }) => {
 
   const sendBroadcast = (targetUserId, event, payload) => {
     const sb = getSupabase();
-    // To send to another user, we broadcast on THEIR channel
-    sb.channel(`webrtc:${targetUserId}`).send({
-      type: 'broadcast',
-      event,
-      payload
+    const ch = sb.channel(`webrtc:${targetUserId}`);
+    ch.subscribe((status) => {
+      if (status === 'SUBSCRIBED') {
+        ch.send({
+          type: 'broadcast',
+          event,
+          payload
+        }).then(() => {
+          // Cleanup this temporary sending channel
+          sb.removeChannel(ch);
+        });
+      }
     });
   };
 
@@ -147,8 +154,8 @@ export const CallProvider = ({ children }) => {
         offer, 
         type, 
         caller_id: currentUser.id,
-        caller_name: currentUser.user_metadata?.name || 'Someone',
-        caller_photo: currentUser.user_metadata?.avatar_url || ''
+        caller_name: currentUser.name || currentUser.user_metadata?.name || 'Someone',
+        caller_photo: currentUser.photo_url || currentUser.user_metadata?.avatar_url || ''
       });
     } catch (err) {
       console.error('Error creating offer', err);

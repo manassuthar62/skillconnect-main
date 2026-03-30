@@ -70,6 +70,59 @@
   color: #fff;
 }
 
+/* Work Toggle */
+.workToggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--b1);
+  background: var(--surface-2);
+  color: var(--t2);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 13px;
+  font-weight: 600;
+  height: 38px;
+}
+
+.workActive {
+  background: rgba(37, 99, 235, 0.1);
+  border-color: rgba(37, 99, 235, 0.4);
+  color: #2563eb;
+  box-shadow: 0 0 16px rgba(37, 99, 235, 0.1);
+}
+
+.workToggle:hover:not(:disabled) {
+  background: var(--surface-3);
+  transform: translateY(-1px);
+}
+
+.workActive:hover:not(:disabled) {
+  background: rgba(37, 99, 235, 0.15);
+}
+
+.workToggle:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.workLabel {
+  display: inline-block;
+}
+
+@media (max-width: 480px) {
+  .workLabel {
+    display: none;
+  }
+  .workToggle {
+    padding: 0;
+    width: 38px;
+    justify-content: center;
+  }
+}
+
 /* Avatar */
 .avatarContainer {
   position: relative;

@@ -4,10 +4,11 @@ import { useAuth } from '@/context/AuthContext';
 import { getSupabase } from '@/lib/supabase';
 import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Camera, Plus, X, Save, Share2, Zap, Youtube, Instagram, Linkedin, Github, Twitter, MessageCircle, Link, Bell, BellOff } from 'lucide-react';
+import { Camera, Plus, X, Save, Share2, Zap, Youtube, Instagram, Linkedin, Github, Twitter, MessageCircle, Link, Bell, BellOff, Trophy, ExternalLink, Trash2, Dna, TrendingUp, Sparkles } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import { registerPushNotifications } from '@/lib/pushClient';
+import CareerSimulator from '@/components/CareerSimulator';
 import styles from './profile.module.css';
 
 
@@ -17,7 +18,6 @@ const SOCIAL_FIELDS = [
   { key: 'linkedin',  icon: Linkedin,      placeholder: 'Your LinkedIn profile URL' },
   { key: 'github',    icon: Github,        placeholder: 'Your GitHub profile URL' },
   { key: 'twitter',   icon: Twitter,       placeholder: 'Your Twitter profile URL' },
-  { key: 'whatsapp',  icon: MessageCircle, placeholder: 'Your WhatsApp number (with country code)' },
 ];
 
 export default function ProfilePage() {
@@ -37,9 +37,15 @@ export default function ProfilePage() {
   const [form, setForm] = useState({
     username: '', name: '', title: '', location: '', bio: '',
     preferred_exchange: '', skills: [],
-    social: { youtube: '', instagram: '', linkedin: '', github: '', twitter: '', whatsapp: '' },
+    social: { youtube: '', instagram: '', linkedin: '', github: '', twitter: '' },
     custom_links: [],
   });
+
+  const [isSimulatorOpen, setIsSimulatorOpen] = useState(false);
+
+  const [portfolio, setPortfolio] = useState([]);
+  const [newPortfolio, setNewPortfolio] = useState({ title: '', description: '', result_metric: '', media_url: '' });
+  const [portfolioLoading, setPortfolioLoading] = useState(false);
 
   // Check if notifications already granted
   useEffect(() => {
@@ -63,7 +69,19 @@ export default function ProfilePage() {
       social:            userProfile.social || {},
       custom_links:      userProfile.custom_links || [],
     });
-  }, [userProfile]);
+
+    // Fetch Portfolio Items
+    const fetchPortfolio = async () => {
+      setPortfolioLoading(true);
+      try {
+        const sb = getSupabase();
+        const { data } = await sb.from('portfolio_items').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+        if (data) setPortfolio(data);
+      } catch (e) { console.error('Portfolio fetch failed', e); }
+      setPortfolioLoading(false);
+    };
+    fetchPortfolio();
+  }, [userProfile, currentUser.id]);
 
   const set = (f, v) => setForm(p => ({ ...p, [f]: v }));
   const setSocial = (k, v) => setForm(p => ({ ...p, social: { ...p.social, [k]: v } }));
@@ -71,6 +89,29 @@ export default function ProfilePage() {
   const removeSkill = sk => set('skills', form.skills.filter(s => s !== sk));
   const addLink = () => { if (!customLinkTitle.trim() || !customLinkUrl.trim()) return; set('custom_links', [...form.custom_links, { title: customLinkTitle.trim(), url: customLinkUrl.trim() }]); setCustomLinkTitle(''); setCustomLinkUrl(''); };
   const removeLink = i => set('custom_links', form.custom_links.filter((_, idx) => idx !== i));
+
+  const handleAddPortfolio = async () => {
+    if (!newPortfolio.title.trim()) return toast.error('Title is required for portfolio');
+    setPortfolioLoading(true);
+    try {
+      const sb = getSupabase();
+      const { data, error } = await sb.from('portfolio_items').insert([{ ...newPortfolio, user_id: currentUser.id }]).select();
+      if (error) throw error;
+      setPortfolio([data[0], ...portfolio]);
+      setNewPortfolio({ title: '', description: '', result_metric: '', media_url: '' });
+      toast.success('Portfolio item added! 🏆');
+    } catch (e) { toast.error(e.message); }
+    setPortfolioLoading(false);
+  };
+
+  const removePortfolio = async (id) => {
+    try {
+      const sb = getSupabase();
+      await sb.from('portfolio_items').delete().eq('id', id);
+      setPortfolio(portfolio.filter(p => p.id !== id));
+      toast.success('Item removed');
+    } catch (e) { toast.error('Failed to remove'); }
+  };
 
   const handlePhoto = async (e) => {
     const file = e.target.files[0]; if (!file) return;
@@ -100,9 +141,24 @@ export default function ProfilePage() {
     setSaving(true);
     try {
       const sb = getSupabase();
-      await sb.from('users').update({ ...form, photo_url: photoURL }).eq('id', currentUser.id);
+      
+      // Generate AI Skill DNA if bio or skills changed
+      let dna = userProfile?.skill_dna || {};
+      if (form.bio !== userProfile?.bio || JSON.stringify(form.skills) !== JSON.stringify(userProfile?.skills)) {
+        toast('Generating AI Skill DNA... 🧬', { icon: '🧠' });
+        try {
+          const res = await fetch('/api/ai/skill-dna', {
+            method: 'POST',
+            body: JSON.stringify({ profile: form }),
+          });
+          const newDna = await res.json();
+          if (!newDna.error) dna = newDna;
+        } catch (e) { console.error('DNA gen failed', e); }
+      }
+
+      await sb.from('users').update({ ...form, photo_url: photoURL, skill_dna: dna }).eq('id', currentUser.id);
       await refreshProfile();
-      toast.success('Profile saved! ✅');
+      toast.success('Profile saved with AI Skill DNA! ✅');
       if (isSetupMode) router.replace('/chat');
     } catch (e) { toast.error(e.message); }
     setSaving(false);
@@ -183,6 +239,62 @@ export default function ProfilePage() {
           </button>
         </div>
 
+        {/* AI Skill DNA Display */}
+        {userProfile?.skill_dna?.type && (
+          <div className={styles.dnaSection}>
+            <div className={styles.dnaHeader}>
+              <div className={styles.dnaIconBox}><Dna size={20} /></div>
+              <div className={styles.dnaTitleCol}>
+                <div className={styles.dnaLabel}>Your AI Skill DNA</div>
+                <div className={styles.dnaValue}>{userProfile.skill_dna.type}</div>
+              </div>
+              <div className={styles.dnaBadge}>{userProfile.skill_dna.dna_string}</div>
+            </div>
+            
+            <div className={styles.dnaStats}>
+              <div className={styles.dnaStat}>
+                <span className={styles.dnaStatValue}>{userProfile.skill_dna.learning_speed}%</span>
+                <span className={styles.dnaStatLabel}>Learning Speed</span>
+              </div>
+              <div className={styles.dnaStatDivider} />
+              <div className={styles.dnaStat}>
+                <span className={styles.dnaStatValue}>{userProfile.skill_dna.strengths?.length || 0}</span>
+                <span className={styles.dnaStatLabel}>Core Strengths</span>
+              </div>
+              <div className={styles.dnaStatDivider} />
+              <div className={styles.dnaStat}>
+                <span className={styles.dnaStatValue} style={{ color: '#fbbf24' }}>↑ 2.5x</span>
+                <span className={styles.dnaStatLabel}>Income Booster</span>
+              </div>
+            </div>
+
+            <div className={styles.dnaDetails}>
+              <div className={styles.dnaDetailCol}>
+                <div className={styles.dnaDetailTitle}>Top Talents</div>
+                <div className={styles.dnaDetailTags}>
+                  {userProfile.skill_dna.strengths?.map(s => <span key={s} className={styles.dnaTag}>{s}</span>)}
+                </div>
+              </div>
+              <div className={styles.dnaDetailCol}>
+                <div className={styles.dnaDetailTitle}>Hidden Potential</div>
+                <div className={styles.dnaDetailTags}>
+                  {userProfile.skill_dna.hidden_talents?.map(s => <span key={s} className={`${styles.dnaTag} ${styles.dnaTagHidden}`}>{s}</span>)}
+                </div>
+              </div>
+            </div>
+            <p className={styles.dnaHint}>Generated by AI based on your unique skill set and bio.</p>
+            <button className={styles.simulatorBtn} onClick={() => setIsSimulatorOpen(true)}>
+              <TrendingUp size={14} /> Simulate My Future
+            </button>
+          </div>
+        )}
+
+        <CareerSimulator 
+          isOpen={isSimulatorOpen} 
+          onClose={() => setIsSimulatorOpen(false)} 
+          profile={userProfile} 
+        />
+
         {/* Username */}
         <div className={styles.section}>
           <div className="input-group">
@@ -253,6 +365,45 @@ export default function ProfilePage() {
             <label className={styles.label}>Preferred Exchange</label>
             <input className="input" placeholder="e.g., Free, Coffee/meal, Skill trade, $20/hour"
               value={form.preferred_exchange} onChange={e => set('preferred_exchange', e.target.value)} />
+          </div>
+        </div>
+
+        {/* Proof of Work (Portfolio) */}
+        <div className={styles.section}>
+          <label className={styles.label}>Proof of Work (Portfolio Items)</label>
+          <p className={styles.hint} style={{ marginBottom: 12 }}>Showcase actual results. Example: "Increased sales by 20%" or "Edited 50+ viral reels".</p>
+          
+          <div className={styles.portfolioGrid}>
+            {portfolio.map(item => (
+              <div key={item.id} className={styles.portfolioCard}>
+                <div className={styles.portfolioHeader}>
+                  <Trophy size={14} className={styles.trophyIcon} />
+                  <span className={styles.portfolioTitle}>{item.title}</span>
+                  <button onClick={() => removePortfolio(item.id)} className={styles.removeBtn}><Trash2 size={13} /></button>
+                </div>
+                {item.result_metric && <div className={styles.resultBadge}>{item.result_metric}</div>}
+                <p className={styles.portfolioDesc}>{item.description}</p>
+                {item.media_url && (
+                  <a href={item.media_url} target="_blank" rel="noopener noreferrer" className={styles.portfolioLink}>
+                    <ExternalLink size={12} /> View Work
+                  </a>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div className={styles.addPortfolioBox}>
+            <input className="input" placeholder="Title (e.g. SEO Project)" 
+              value={newPortfolio.title} onChange={e => setNewPortfolio({...newPortfolio, title: e.target.value})} />
+            <input className="input" placeholder="Result (e.g. 50k views)" 
+              value={newPortfolio.result_metric} onChange={e => setNewPortfolio({...newPortfolio, result_metric: e.target.value})} />
+            <textarea className="input" placeholder="Quick description..." rows={2}
+              value={newPortfolio.description} onChange={e => setNewPortfolio({...newPortfolio, description: e.target.value})} />
+            <input className="input" placeholder="Link to work (optional)" 
+              value={newPortfolio.media_url} onChange={e => setNewPortfolio({...newPortfolio, media_url: e.target.value})} />
+            <button className="btn btn-secondary btn-sm" onClick={handleAddPortfolio} disabled={portfolioLoading} style={{ marginTop: 8 }}>
+              {portfolioLoading ? 'Adding...' : <><Plus size={14} /> Add Portfolio Item</>}
+            </button>
           </div>
         </div>
 

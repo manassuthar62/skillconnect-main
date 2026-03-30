@@ -47,6 +47,8 @@ export default function ChatRoomPage() {
   const [isOtherTyping, setIsOtherTyping] = useState(false);
   const [isRewriting, setIsRewriting] = useState(false);
   const [smartReplies, setSmartReplies] = useState([]);
+  const [dealInsights, setDealInsights] = useState(null);
+  const [isGettingDealTips, setIsGettingDealTips] = useState(false);
   const bottomRef = useRef(null);
   const menuRef   = useRef(null);
   const typingTimeoutRef = useRef(null);
@@ -279,28 +281,56 @@ export default function ChatRoomPage() {
     router.push('/chat');
   };
 
+  const handleGetDealTips = async () => {
+    if (messages.length < 2 || isGettingDealTips) return;
+    setIsGettingDealTips(true);
+    try {
+      const recent = messages.slice(-10).map(m => ({
+        role: m.sender_id === currentUser.id ? 'me' : 'them',
+        text: m.text
+      }));
+      const res = await fetch('/api/ai/chat-assistant', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode: 'negotiate', recentMessages: recent })
+      });
+      const data = await res.json();
+      if (data.result) setDealInsights(data.result);
+      else toast.error('Could not get tips');
+    } catch (err) { toast.error('AI Error'); }
+    setIsGettingDealTips(false);
+  };
+
   const filteredMessages = messages.filter(m => m.text.toLowerCase().includes(searchQuery.toLowerCase()));
 
   let lastDate = null;
 
   return (
-    <div className="wa-chat-page">
-      <div className="wa-chat-header">
-        <button className="wa-icon-btn" onClick={() => router.push('/chat')}><ArrowLeft size={20} /></button>
-        <div style={{ position: 'relative' }}>
+    <div className="wa-chat-page" style={{ height: '100dvh' }}>
+      <div className="wa-chat-header" style={{ 
+        paddingTop: 'calc(10px + env(safe-area-inset-top, 0px))', 
+        zIndex: 100,
+        position: 'sticky',
+        top: 0
+      }}>
+        <button className="wa-icon-btn" onClick={() => router.push('/chat')} style={{ marginRight: 4 }}><ArrowLeft size={22} /></button>
+        <div style={{ position: 'relative', cursor: 'pointer', flexShrink: 0 }} onClick={(e) => { e.stopPropagation(); router.push(publicProfileHref); }}>
           <UserAvatar user={otherUser} size={40} className="avatar" alt={otherUser?.name || ''} />
           <div
             className={`status-dot ${isOtherOnline ? 'online' : ''}`}
-            style={{ position: 'absolute', bottom: 0, right: 0, border: '2px solid var(--header)' }}
+            style={{ position: 'absolute', bottom: 0, right: 0, border: '2px solid #fff' }}
           />
         </div>
-        <div className="wa-chat-header-info" onClick={() => router.push(publicProfileHref)} style={{ cursor: 'pointer' }}>
-          <div className="wa-chat-header-name">{otherUser?.name || 'Loading...'}</div>
-          <div className="wa-chat-header-status" style={{ color: isOtherOnline ? '#4ade80' : '#ff4444' }}>
+        <div className="wa-chat-header-info" onClick={() => router.push(publicProfileHref)} style={{ cursor: 'pointer', flex: 1, minWidth: 0 }}>
+          <div className="wa-chat-header-name" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{otherUser?.name || 'Loading...'}</div>
+          <div className="wa-chat-header-status" style={{ color: isOtherOnline ? '#4ade80' : '#ff4444', fontSize: 11 }}>
             {isOtherTyping ? '⌨️ TYPING...' : isOtherOnline ? '🟢 ONLINE NOW' : '🔴 OFFLINE'}
           </div>
         </div>
-        <div style={{ display: 'flex', gap: 2, alignItems: 'center', position: 'relative' }}>
+        <div style={{ display: 'flex', gap: 2, alignItems: 'center', position: 'relative', flexShrink: 0 }}>
+          <button className="wa-icon-btn" onClick={handleGetDealTips} disabled={isGettingDealTips} title="AI Deal Closer">
+            {isGettingDealTips ? <span className="spinner" style={{ width: 14, height: 14 }} /> : <Sparkles size={20} color="#fbbf24" />}
+          </button>
           <button className="wa-icon-btn" onClick={() => startCall('video', userId)}><Video size={20} /></button>
           <button className="wa-icon-btn" onClick={() => startCall('audio', userId)}><Phone size={20} /></button>
           <button className="wa-icon-btn" onClick={() => { setIsSearching(!isSearching); if(isSearching) setSearchQuery(''); }}>
@@ -371,6 +401,36 @@ export default function ChatRoomPage() {
           </div>
         </div>
       </div>
+
+      <AnimatePresence>
+        {dealInsights && (
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
+            style={{
+              position: 'absolute', top: 70, left: 16, right: 16, zIndex: 120,
+              background: 'rgba(26, 31, 46, 0.95)', backdropFilter: 'blur(12px)',
+              borderRadius: 16, border: '1px solid rgba(251, 191, 36, 0.3)',
+              boxShadow: '0 12px 40px rgba(0,0,0,0.5)', padding: 16,
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ background: '#fbbf24', color: '#000', padding: '4px 8px', borderRadius: 6, fontSize: 10, fontWeight: 800 }}>AI DEAL CLOSER</div>
+                <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>{dealInsights.strategy}</span>
+              </div>
+              <button className="wa-icon-btn" onClick={() => setDealInsights(null)}><X size={16}/></button>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {dealInsights.tips?.map((tip, i) => (
+                <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                  <div style={{ marginTop: 4 }}><Sparkles size={12} color="#fbbf24" /></div>
+                  <div style={{ fontSize: 13, color: '#fff', lineHeight: 1.4 }}>{tip}</div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {isSearching && (

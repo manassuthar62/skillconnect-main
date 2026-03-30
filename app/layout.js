@@ -5,8 +5,8 @@ import { Toaster } from 'react-hot-toast';
 import ServiceWorkerRegister from '@/components/ServiceWorkerRegister';
 
 export const metadata = {
-  title: 'SkillConnect — Connect Through Skills',
-  description: 'A WhatsApp-style networking app to showcase your skills and connect with others',
+  title: 'Connectify AI — Skills & Networking',
+  description: 'Elevate your hustle via personal skills & networking',
   manifest: '/manifest.json',
 };
 

@@ -23,6 +23,8 @@ export default function CommunityPage() {
   const [loading,  setLoading]  = useState(true);
   const [creating, setCreating] = useState(false);
   const [newPost,  setNewPost]  = useState('');
+  const [newPostUrl, setNewPostUrl] = useState('');
+  const [newPostType, setNewPostType] = useState('text'); // text, image
   const [submitting, setSubmitting] = useState(false);
   const [commentInputs,    setCommentInputs]    = useState({});
   const [expandedComments, setExpandedComments] = useState({});
@@ -63,10 +65,15 @@ export default function CommunityPage() {
       const sb = getSupabase();
       await sb.from('posts').insert({
         author_id: currentUser.id,
+        author_name: userProfile?.name || 'Someone',
+        author_photo: userProfile?.photo_url || '',
         content: newPost.trim(),
         likes: [],
+        type: newPostType,
+        link_url: newPostUrl.trim(),
+        is_boosted: newPost.length > 100 && newPost.toLowerCase().includes('portfolio'), // Simple simulated AI boost
       });
-      setNewPost(''); setCreating(false); toast.success('Post shared! 🎉');
+      setNewPost(''); setNewPostUrl(''); setNewPostType('text'); setCreating(false); toast.success('Post shared! 🎉');
     } catch { toast.error('Failed to post'); }
     setSubmitting(false);
   };
@@ -119,8 +126,23 @@ export default function CommunityPage() {
                   {userProfile?.photo_url
                     ? <Image src={userProfile.photo_url} alt="" width={40} height={40} className="avatar" />
                     : <div className="avatar-placeholder" style={{ width: 40, height: 40, fontSize: 14 }}>{initials(userProfile?.name)}</div>}
-                  <textarea className={styles.textarea} placeholder="Share something with the community..."
-                    value={newPost} onChange={e => setNewPost(e.target.value)} autoFocus rows={4} />
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    <textarea className={styles.textarea} placeholder="Share something with the community..."
+                      value={newPost} onChange={e => setNewPost(e.target.value)} autoFocus rows={4} />
+                    
+                    <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                      <select className="input" style={{ width: 'auto', padding: '6px 12px', fontSize: 13 }}
+                        value={newPostType} onChange={e => setNewPostType(e.target.value)}>
+                        <option value="text">Just Text</option>
+                        <option value="image">Image URL</option>
+                      </select>
+                      {newPostType === 'image' && (
+                        <input className="input" placeholder="Paste image URL here..." 
+                          value={newPostUrl} onChange={e => setNewPostUrl(e.target.value)}
+                          style={{ flex: 1, padding: '8px 12px', fontSize: 13 }} />
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
               <div className={styles.modalFooter}>
@@ -154,11 +176,19 @@ export default function CommunityPage() {
                     ? <Image src={post.author_photo} alt="" width={42} height={42} className="avatar" />
                     : <div className="avatar-placeholder" style={{ width: 42, height: 42, fontSize: 14 }}>{initials(post.author_name || userProfile?.name)}</div>}
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 700, fontSize: 14 }}>{post.author_name || 'User'}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <div style={{ fontWeight: 700, fontSize: 14 }}>{post.author_name || 'User'}</div>
+                      {post.is_boosted && <span className={styles.boostedBadge}><Sparkles size={10} /> AI Boosted</span>}
+                    </div>
                     <div style={{ fontSize: 11, color: 'var(--t3)' }}>{fmt(post.created_at)}</div>
                   </div>
                 </div>
                 <p className={styles.postContent}>{post.content}</p>
+                {post.type === 'image' && post.link_url && (
+                  <div className={styles.postMedia}>
+                    <img src={post.link_url} alt="Portfolio" />
+                  </div>
+                )}
                 <div className={styles.postActions}>
                   <button className={`btn btn-ghost btn-sm ${liked ? styles.liked : ''}`} onClick={() => toggleLike(post)}>
                     <Heart size={16} fill={liked ? '#ef4444' : 'none'} color={liked ? '#ef4444' : 'currentColor'} />

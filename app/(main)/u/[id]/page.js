@@ -5,7 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { getSupabase } from '@/lib/supabase';
 import { sendPushNotification } from '@/lib/pushClient';
 import UserAvatar from '@/components/UserAvatar';
-import { ArrowLeft, MapPin, Youtube, Instagram, Linkedin, Github, Twitter, MessageCircle, Link as LinkIcon, Clock, UserPlus, UserX, MessageSquare, Zap } from 'lucide-react';
+import { ArrowLeft, MapPin, Youtube, Instagram, Linkedin, Github, Twitter, MessageCircle, Link as LinkIcon, Clock, UserPlus, UserX, MessageSquare, Zap, ShieldCheck, Trophy, ExternalLink, Dna } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function PublicProfilePage() {
@@ -14,6 +14,7 @@ export default function PublicProfilePage() {
   const { currentUser, refreshProfile } = useAuth();
   
   const [profile, setProfile] = useState(null);
+  const [portfolio, setPortfolio] = useState([]);
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState(null); // 'connected' | 'pending' | null
   const [busy, setBusy] = useState(false);
@@ -33,6 +34,8 @@ export default function PublicProfilePage() {
       }
       setProfile(targetUser);
 
+      // Fetch Portfolio and other data...
+
       // Fetch connection status if logged in
       if (currentUser && currentUser.id !== targetUser.id) {
         const [{ data: sentReqs }, { data: recvReqs }] = await Promise.all([
@@ -49,6 +52,11 @@ export default function PublicProfilePage() {
         }
         setStatus(currentStatus);
       }
+
+      // Fetch Portfolio
+      const { data: portData } = await sb.from('portfolio_items').select('*').eq('user_id', targetUser.id).order('created_at', { ascending: false });
+      if (portData) setPortfolio(portData);
+
       setLoading(false);
     })();
   }, [id, currentUser]);
@@ -62,10 +70,10 @@ export default function PublicProfilePage() {
       await sb.from('connection_requests').insert({
         from_uid: currentUser.id, to_uid: profile.id, status: 'pending',
       });
-      // Clean up any old cancelled notification from me to this person
+      // Clean up any existing notifications of this type from me to this person
       await sb.from('notifications').delete()
         .eq('user_id', profile.id).eq('from_uid', currentUser.id)
-        .eq('type', 'connection_request').eq('status', 'cancelled');
+        .eq('type', 'connection_request');
       await sb.from('notifications').insert({
         user_id: profile.id, type: 'connection_request',
         from_uid: currentUser.id, from_name: currentUser.name || 'Someone',
@@ -161,7 +169,7 @@ export default function PublicProfilePage() {
   return (
     <div className="page" style={{ background: 'var(--bg)' }}>
       {/* Header */}
-      <div className="page-header" style={{ position: 'sticky', top: 0, zIndex: 10 }}>
+      <div className="page-header" style={{ position: 'sticky', top: 0, zIndex: 60, background: 'var(--surface)', borderBottom: '1px solid var(--b1)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <button className="wa-icon-btn" onClick={() => router.back()}><ArrowLeft size={20} /></button>
           <div className="page-title">Profile</div>
@@ -181,11 +189,85 @@ export default function PublicProfilePage() {
           
           <div>
             <h2 style={{ fontSize: 24, fontWeight: 700, color: 'var(--t1)' }}>{profile.name}</h2>
-            {profile.username && <div style={{ color: 'var(--accent)', fontWeight: 500, fontSize: 15 }}>@{profile.username}</div>}
+            
+            {/* Trust Score & Availability Row */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, marginTop: 6, flexWrap: 'wrap' }}>
+              {/* Trust Badge */}
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 10px', background: 'rgba(34, 197, 94, 0.1)', color: '#22c55e', borderRadius: 99, fontSize: 12, fontWeight: 700, border: '1px solid rgba(34, 197, 94, 0.2)' }}>
+                <ShieldCheck size={14} />
+                {(profile.trust_score || 95)}% Safe Client
+              </div>
+
+              {/* Instant Work Mode Badge */}
+              {profile.is_available && (
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 10px', background: 'rgba(37, 99, 235, 0.1)', color: '#2563eb', borderRadius: 99, fontSize: 12, fontWeight: 700, border: '1px solid rgba(37, 99, 235, 0.2)' }}>
+                  <Zap size={14} fill="currentColor" />
+                  Instant Work Mode ON
+                </div>
+              )}
+            </div>
+
+            {profile.username && <div style={{ color: 'var(--accent)', fontWeight: 510, fontSize: 15, marginTop: 10 }}>@{profile.username}</div>}
             {profile.title && <div style={{ color: 'var(--t2)', fontSize: 15, marginTop: 4 }}>{profile.title}</div>}
             {profile.location && <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, color: 'var(--t3)', fontSize: 13, marginTop: 4 }}><MapPin size={13} /> {profile.location}</div>}
           </div>
         </div>
+
+        {/* AI Skill DNA Section */}
+        {profile.skill_dna?.type && (
+          <div style={{ 
+            background: 'linear-gradient(145deg, rgba(37, 99, 235, 0.08), rgba(139, 92, 246, 0.05))',
+            border: '1px solid rgba(37, 99, 235, 0.15)',
+            borderRadius: 24,
+            padding: 24,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 20
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{ width: 40, height: 40, background: 'var(--accent)', color: '#fff', borderRadius: 10, display: 'flex', alignItems: 'center', justifyCenter: 'center', flexShrink: 0, paddingLeft: 10 }}>
+                <Dna size={20} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--t3)', textTransform: 'uppercase', letterSpacing: 1 }}>AI Skill DNA</div>
+                <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--t1)' }}>{profile.skill_dna.type}</div>
+              </div>
+              <div style={{ padding: '4px 8px', background: 'rgba(0,0,0,0.05)', borderRadius: 6, fontSize: 12, fontWeight: 700, border: '1px solid var(--b1)', fontFamily: 'monospace' }}>
+                {profile.skill_dna.dna_string}
+              </div>
+            </div>
+
+            <div className="dna-stats" style={{ display: 'flex', gap: 1, background: 'var(--b1)', borderRadius: 12, overflow: 'hidden' }}>
+               <div style={{ flex: 1, background: 'rgba(255,255,255,0.4)', padding: 12, textAlign: 'center' }}>
+                  <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--accent)' }}>{profile.skill_dna.learning_speed}%</div>
+                  <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--t3)', textTransform: 'uppercase' }}>Learning Speed</div>
+               </div>
+                <div style={{ flex: 1, background: 'rgba(255,255,255,0.4)', padding: 12, textAlign: 'center' }}>
+                  <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--accent)' }}>{profile.skill_dna.strengths?.length || 0}</div>
+                  <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--t3)', textTransform: 'uppercase' }}>Core Strengths</div>
+                </div>
+                <div style={{ flex: 1, background: 'rgba(251, 191, 36, 0.1)', padding: 12, textAlign: 'center' }}>
+                  <div style={{ fontSize: 20, fontWeight: 800, color: '#fbbf24' }}>{profile.skill_dna.income_booster || '↑ 1.5x'}</div>
+                  <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--t3)', textTransform: 'uppercase' }}>Income Booster</div>
+                </div>
+            </div>
+
+            <div className="dna-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+               <div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--t2)', marginBottom: 8 }}>Top Talents</div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                    {profile.skill_dna.strengths?.map(s => <span key={s} style={{ background: '#fff', border: '1px solid var(--b1)', padding: '4px 8px', borderRadius: 6, fontSize: 11, fontWeight: 600 }}>{s}</span>)}
+                  </div>
+               </div>
+               <div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--t2)', marginBottom: 8 }}>Hidden Potential</div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                    {profile.skill_dna.hidden_talents?.map(s => <span key={s} style={{ background: 'rgba(139, 92, 246, 0.05)', border: '1px solid rgba(139, 92, 246, 0.2)', padding: '4px 8px', borderRadius: 6, fontSize: 11, fontWeight: 600, color: '#8b5cf6' }}>{s}</span>)}
+                  </div>
+               </div>
+            </div>
+          </div>
+        )}
 
         {/* Action Buttons */}
         {!isMe && currentUser && (
@@ -244,6 +326,39 @@ export default function PublicProfilePage() {
           )}
         </div>
 
+        {/* Portfolio / Proof of Work Sections */}
+        {portfolio.length > 0 && (
+          <div>
+             <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--t3)', textTransform: 'uppercase', marginBottom: 12, paddingLeft: 4 }}>Proof of Work (Portfolio)</div>
+             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 12 }}>
+                {portfolio.map(item => (
+                  <div key={item.id} style={{ background: 'var(--surface)', border: '1px solid var(--b1)', borderRadius: 16, padding: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <Trophy size={16} color="#f59e0b" />
+                      <span style={{ fontWeight: 700, fontSize: 15, color: 'var(--t1)' }}>{item.title}</span>
+                    </div>
+                    {item.result_metric && (
+                      <div style={{ alignSelf: 'flex-start', background: 'rgba(34, 197, 94, 0.1)', color: '#22c55e', padding: '4px 10px', borderRadius: 8, fontSize: 11, fontWeight: 700, letterSpacing: '0.4px', border: '1px solid rgba(34, 197, 94, 0.2)' }}>
+                        {item.result_metric}
+                      </div>
+                    )}
+                    {item.media_url && (
+                      <div style={{ width: '100%', height: 160, borderRadius: 12, overflow: 'hidden', background: '#000', border: '1px solid var(--b1)' }}>
+                        <img src={item.media_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      </div>
+                    )}
+                    <p style={{ fontSize: 13, color: 'var(--t2)', lineHeight: 1.5 }}>{item.description}</p>
+                    {item.media_url && (
+                      <a href={item.media_url} target="_blank" rel="noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--accent)', textDecoration: 'none', fontWeight: 600 }}>
+                        <ExternalLink size={12} /> View Full Work
+                      </a>
+                    )}
+                  </div>
+                ))}
+             </div>
+          </div>
+        )}
+
         {/* Social Links */}
         {(profile.social?.youtube || profile.social?.instagram || profile.social?.linkedin || profile.social?.github || profile.social?.twitter || profile.social?.whatsapp || profile.custom_links?.length > 0) && (
           <div>
@@ -254,7 +369,6 @@ export default function PublicProfilePage() {
               <SocialBtn icon={Linkedin} url={profile.social?.linkedin} label="LinkedIn" />
               <SocialBtn icon={Github} url={profile.social?.github} label="GitHub" />
               <SocialBtn icon={Twitter} url={profile.social?.twitter} label="Twitter" />
-              <SocialBtn icon={MessageCircle} url={profile.social?.whatsapp} label="WhatsApp" />
               
               {profile.custom_links?.map((link, i) => (
                 <SocialBtn key={i} icon={LinkIcon} url={link.url} label={link.title} />
@@ -264,6 +378,21 @@ export default function PublicProfilePage() {
         )}
 
       </div>
+      <style jsx>{`
+        @media (max-width: 600px) {
+          .dna-stats { 
+            flex-direction: column; 
+            gap: 1px !important; 
+          }
+          .dna-grid { 
+            grid-template-columns: 1fr !important;
+            gap: 20px !important;
+          }
+          .page-header {
+            padding-top: env(safe-area-inset-top);
+          }
+        }
+      `}</style>
     </div>
   );
 }

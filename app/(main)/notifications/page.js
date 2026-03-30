@@ -168,7 +168,7 @@ export default function NotificationsPage() {
                 Incoming Requests
               </span>
               <span style={{ background: 'var(--accent)', color: '#000', borderRadius: 999, fontSize: 11, fontWeight: 700, padding: '1px 7px' }}>
-                {incoming.length}
+                {incoming.filter(n => !n.status).length}
               </span>
             </div>
             {incoming.length === 0

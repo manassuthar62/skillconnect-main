@@ -5,7 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { getSupabase } from '@/lib/supabase';
 import { sendPushNotification } from '@/lib/pushClient';
 import { Search, MapPin, X, UserCheck, MessageSquare, Clock, UserX, Zap, Sparkles, Lightbulb, ChevronUp, ChevronDown, SlidersHorizontal } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import UserAvatar from '@/components/UserAvatar';
 import styles from './discover.module.css';
@@ -20,15 +20,10 @@ export default function DiscoverPage() {
   const router = useRouter();
   const [users,      setUsers]     = useState([]);
   // Persist search across tab switches using sessionStorage
-  const [search,     setSearch]    = useState(() => {
-    if (typeof window !== 'undefined') return sessionStorage.getItem('discover_search') || '';
-    return '';
-  });
-  const [location,   setLocation]  = useState(() => {
-    if (typeof window !== 'undefined') return sessionStorage.getItem('discover_location') || '';
-    return '';
-  });
+  const [search,     setSearch]    = useState('');
+  const [location,   setLocation]  = useState('');
   const [loading,    setLoading]   = useState(true);
+  const [selectedSkill, setSelectedSkill] = useState(null);
   const [busy,       setBusy]      = useState({});
   const [aiMode,     setAiMode]    = useState(false);
   const [aiResults,  setAiResults] = useState([]);
@@ -37,6 +32,8 @@ export default function DiscoverPage() {
   const [isSearching, setIsSearching] = useState(false);
   const [statusMap,  setStatusMap] = useState({});
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isHunting,   setIsHunting]   = useState(false);
+  const [opportunities, setOpportunities] = useState([]);
 
   // Save search/location to sessionStorage on change
   const handleSearchChange = (val) => { setSearch(val); sessionStorage.setItem('discover_search', val); };
@@ -94,10 +91,12 @@ export default function DiscoverPage() {
   }, [currentUser]);
 
   const filtered = users.filter(u => {
-    const s = search.toLowerCase(), l = location.toLowerCase();
-    const ok1 = !s || u.name?.toLowerCase().includes(s) || u.skills?.some(sk => sk.toLowerCase().includes(s)) || u.bio?.toLowerCase().includes(s) || u.title?.toLowerCase().includes(s);
-    const ok2 = !l || u.location?.toLowerCase().includes(l);
-    return ok1 && ok2;
+    const s = search.toLowerCase();
+    const l = location.toLowerCase();
+    const skillMatch = !selectedSkill || u.skills?.some(sk => sk === selectedSkill);
+    const textMatch = !s || u.name?.toLowerCase().includes(s) || u.skills?.some(sk => sk.toLowerCase().includes(s)) || u.bio?.toLowerCase().includes(s) || u.title?.toLowerCase().includes(s);
+    const locMatch = !l || u.location?.toLowerCase().includes(l);
+    return skillMatch && textMatch && locMatch;
   });
 
   const handleSearch = async () => {
@@ -128,6 +127,35 @@ export default function DiscoverPage() {
       toast.error(err.message);
     } finally {
       setIsSearching(false);
+    }
+  };
+
+  const handleHunt = async () => {
+    if (!userProfile?.title || !userProfile?.skills?.length) {
+      toast.error('Please complete your Profile (Title & Skills) first! 👤');
+      router.push('/profile');
+      return;
+    }
+    if (isHunting) return;
+    setIsHunting(true);
+    setOpportunities([]);
+    try {
+      const res = await fetch('/api/ai/opportunity-hunter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ profile: userProfile })
+      });
+      const data = await res.json();
+      if (data.opportunities) {
+        setOpportunities(data.opportunities);
+        toast.success(`Found ${data.opportunities.length} fresh opportunities! 🚀`);
+      } else {
+        toast.error(data.error || 'No opportunities found');
+      }
+    } catch (err) {
+      toast.error('AI Hunt Failed');
+    } finally {
+      setIsHunting(false);
     }
   };
 
@@ -294,6 +322,13 @@ export default function DiscoverPage() {
             </button>
             <span className={styles.aiLabel}><Sparkles size={13} /> AI Suggestions</span>
           </div>
+          <button 
+            className={styles.huntBtn}
+            onClick={handleHunt}
+            disabled={isHunting}
+          >
+            {isHunting ? <span className="spinner-white" /> : <><Zap size={14} /> AI Hunt</>}
+          </button>
         </div>
         {isFilterOpen && <div className={styles.filterBar}>
           <div className={styles.filterHeader}>
@@ -318,8 +353,8 @@ export default function DiscoverPage() {
             {POPULAR_SKILLS.map(sk => (
               <button
                 key={sk}
-                className={`${styles.chip}${search === sk ? ` ${styles.chipActive}` : ''}`}
-                onClick={() => setSearch(search === sk ? '' : sk)}
+                className={`${styles.chip}${selectedSkill === sk ? ` ${styles.chipActive}` : ''}`}
+                onClick={() => setSelectedSkill(selectedSkill === sk ? null : sk)}
               >
                 {sk}
               </button>
@@ -332,6 +367,43 @@ export default function DiscoverPage() {
         <span className={styles.resultsTitle}>Discover People</span>
         <span className={styles.resultsCount}>{loading ? '...' : `${filtered.length} result${filtered.length !== 1 ? 's' : ''}`}</span>
       </div>
+
+      {/* Opportunities Horizontal Scroll */}
+      <AnimatePresence>
+        {opportunities.length > 0 && (
+          <motion.div 
+            initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
+            className={styles.oppSection}
+          >
+            <div className={styles.oppHeader}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Zap size={16} fill="var(--accent)" color="var(--accent)" />
+                <span style={{ fontWeight: 700, fontSize: 13, letterSpacing: 0.5, textTransform: 'uppercase' }}>AI Matched Opportunities</span>
+              </div>
+              <button className={styles.oppClose} onClick={() => setOpportunities([])}><X size={14}/></button>
+            </div>
+            <div className={styles.oppScroll}>
+              {opportunities.map((opp, i) => (
+                <div key={i} className={styles.oppCard} onClick={() => {
+                  if (opp.target_handle || opp.target_uid) {
+                    router.push(`/u/${opp.target_handle || opp.target_uid}`);
+                  }
+                }} style={{ cursor: 'pointer' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div className={styles.oppMatch}>{opp.match_score}% Match</div>
+                    <div className={styles.oppBudget}>{opp.budget}</div>
+                  </div>
+                  <div className={styles.oppTitle}>{opp.title}</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--accent)', marginBottom: 4 }}>with {opp.target_name || 'Community Member'}</div>
+                  <div className={styles.oppPlatform}>{opp.platform} • {opp.deadline}</div>
+                  <div className={styles.oppWhy}>{opp.why}</div>
+                  <button className={styles.oppApplyBtn}>View Match & Connect</button>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {loading ? <div className="empty-state"><div className="spinner" /></div>
       : (filtered.length === 0) ? (

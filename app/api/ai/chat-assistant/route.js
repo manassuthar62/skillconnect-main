@@ -17,7 +17,7 @@ export async function POST(req) {
       Keep the meaning same. Keep it under 2 sentences. Don't add quotes or conversational filler. Original message: "${text}"`;
       
       const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash', 
+        model: 'gemini-2.5-flash',
         contents: prompt,
       });
       
@@ -50,6 +50,40 @@ export async function POST(req) {
       } catch (e) {
         // Fallback if AI doesn't return clean JSON
         return NextResponse.json({ result: ["Okay!", "Thanks", "Sure"] });
+      }
+    }
+    else if (mode === 'negotiate') {
+      if (!recentMessages || recentMessages.length === 0) {
+        return NextResponse.json({ error: 'Context required' }, { status: 400 });
+      }
+
+      const conversation = recentMessages.slice(-8).map(m => `${m.role}: ${m.text}`).join('\n');
+      const prompt = `Analyze this business/professional chat conversation. 
+      Suggest 2-3 specific, high-leverage negotiation tactics or "Deal Closer" tips for the current user to use right now.
+      Focus on increasing rates, closing the deal faster, or adding value.
+      Return a JSON object with:
+      - tips: An array of strings (max 20 words each)
+      - strategy: A short summary of the current vibe (e.g. "Client is interested but hesitant on price")
+      
+      Conversation:
+      ${conversation}`;
+
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+      });
+      
+      let rawText = response.text.trim();
+      
+      if (rawText.startsWith('```json')) {
+        rawText = rawText.replace(/```json\n?|\n?```/g, '').trim();
+      }
+
+      try {
+        const insights = JSON.parse(rawText);
+        return NextResponse.json({ result: insights });
+      } catch (e) {
+        return NextResponse.json({ result: { tips: ["Try offering a bundle", "Focus on your unique ROI"], strategy: "N/A" } });
       }
     }
 

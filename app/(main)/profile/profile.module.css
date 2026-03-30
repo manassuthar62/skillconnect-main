@@ -187,8 +187,243 @@
 }
 .customLinkTitle { font-weight: 600; color: var(--t1); flex-shrink: 0; }
 .customLinkUrl { color: var(--t3); font-size: 12px; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.removeBtn { margin-left: auto; color: var(--t3); flex-shrink: 0; transition: color 0.15s; }
+.removeBtn { margin-left: auto; color: var(--t3); flex-shrink: 0; transition: color 0.15s; background: none; border: none; cursor: pointer; padding: 4px; }
 .removeBtn:hover { color: #e57373; }
+
+/* Portfolio */
+.portfolioGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.portfolioCard {
+  background: var(--surface-2);
+  border: 1px solid var(--b1);
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.portfolioCard:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: rgba(37, 99, 235, 0.2);
+}
+
+.portfolioHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.trophyIcon {
+  color: #f59e0b;
+}
+
+.portfolioTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--t1);
+  flex: 1;
+}
+
+.resultBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  background: rgba(37, 99, 235, 0.1);
+  color: #2563eb;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  width: fit-content;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.portfolioDesc {
+  font-size: 13px;
+  color: var(--t2);
+  line-height: 1.5;
+}
+
+.portfolioLink {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.portfolioLink:hover {
+  text-decoration: underline;
+}
+
+.addPortfolioBox {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--surface-3);
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px dashed var(--b2);
+}
+
+/* AI Skill DNA */
+.dnaSection {
+  background: linear-gradient(145deg, rgba(37, 99, 235, 0.08), rgba(139, 92, 246, 0.05));
+  border: 1px solid rgba(37, 99, 235, 0.15);
+  border-radius: 24px;
+  padding: 24px;
+  margin-bottom: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.dnaSection::before {
+  content: '';
+  position: absolute;
+  top: -50px; right: -50px;
+  width: 150px; height: 150px;
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.1) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.dnaHeader {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.dnaIconBox {
+  width: 44px;
+  height: 44px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+}
+
+.dnaTitleCol {
+  flex: 1;
+}
+
+.dnaLabel {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--t3);
+  margin-bottom: 2px;
+}
+
+.dnaValue {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--t1);
+  letter-spacing: -0.5px;
+}
+
+.dnaBadge {
+  background: rgba(0, 0, 0, 0.05);
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-family: monospace;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--t2);
+  border: 1px solid var(--b1);
+}
+
+.dnaStats {
+  display: flex;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1px solid var(--b1);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 24px;
+}
+
+.dnaStat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.dnaStatValue {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--accent);
+}
+
+.dnaStatLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--t3);
+  text-transform: uppercase;
+}
+
+.dnaStatDivider {
+  width: 1px;
+  background: var(--b1);
+  margin: 0 16px;
+}
+
+.dnaDetails {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.dnaDetailTitle {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--t2);
+  margin-bottom: 10px;
+}
+
+.dnaDetailTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.dnaTag {
+  background: #fff;
+  border: 1px solid var(--b1);
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--t1);
+}
+
+.dnaTagHidden {
+  background: rgba(139, 92, 246, 0.05);
+  border-color: rgba(139, 92, 246, 0.2);
+  color: #8b5cf6;
+}
+
+.dnaHint {
+  font-size: 11px;
+  color: var(--t3);
+  margin-top: 20px;
+  text-align: center;
+  font-style: italic;
+}
 
 .hint { font-size: 12px; color: var(--t3); margin-top: 4px; }
 

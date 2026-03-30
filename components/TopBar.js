@@ -4,15 +4,17 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import Image from 'next/image';
-import { Zap, User, LogOut, Bell, Share2, Download } from 'lucide-react';
+import { Zap, ZapOff, User, LogOut, Bell, Share2, Download, CheckCircle } from 'lucide-react';
 import styles from './TopBar.module.css';
 import { toast } from 'react-hot-toast';
 
 export default function TopBar() {
-  const { userProfile, currentUser, logout } = useAuth();
+  const { userProfile, currentUser, logout, refreshProfile } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isWorkMode, setIsWorkMode] = useState(userProfile?.is_available || false);
+  const [updatingMode, setUpdatingMode] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [isInstallable, setIsInstallable] = useState(false);
   const menuRef = useRef(null);
@@ -48,6 +50,31 @@ export default function TopBar() {
 
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    if (userProfile) setIsWorkMode(userProfile.is_available || false);
+  }, [userProfile]);
+
+  const toggleWorkMode = async () => {
+    setUpdatingMode(true);
+    const newMode = !isWorkMode;
+    try {
+      const sb = getSupabase();
+      const { error } = await sb.from('users').update({ is_available: newMode }).eq('id', currentUser.id);
+      if (error) throw error;
+      setIsWorkMode(newMode);
+      await refreshProfile();
+      toast.success(newMode ? 'Instant Work Mode ON! 🚀' : 'Work Mode OFF.');
+    } catch (e) {
+      toast.error('Failed to update mode');
+    }
+    setUpdatingMode(false);
+  };
+
+  const getSupabase = () => {
+    const { getSupabase: getSb } = require('@/lib/supabase');
+    return getSb();
+  };
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) return;
@@ -90,6 +117,17 @@ export default function TopBar() {
             <Download size={18} />
           </button>
         )}
+
+        {/* Instant Work Toggle */}
+        <button 
+          className={`${styles.workToggle} ${isWorkMode ? styles.workActive : ''}`} 
+          onClick={toggleWorkMode}
+          disabled={updatingMode}
+          title={isWorkMode ? "Instant Work ON" : "Turn on Instant Work"}
+        >
+          {isWorkMode ? <Zap size={16} fill="currentColor" /> : <ZapOff size={16} />}
+          <span className={styles.workLabel}>{isWorkMode ? 'Active' : 'Offline'}</span>
+        </button>
 
         {/* Profile avatar / menu */}
         <div className={styles.avatarContainer} ref={menuRef}>
