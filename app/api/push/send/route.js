@@ -1,10 +1,19 @@
 import webpush from 'web-push';
 import { createClient } from '@supabase/supabase-js';
 
+// ✅ FIX: fallback keys add ki
+const publicKey =
+  process.env.VAPID_PUBLIC_KEY ||
+  "BMdap9TiD7XZPHiTgHmwiUT-6l-RhsNziUpbBa4M6IR2C74ONXtGZ3sB1n1h6wmdbftDo0gg7UKRIbksWZiuDck";
+
+const privateKey =
+  process.env.VAPID_PRIVATE_KEY ||
+  "8bWAahauFu9BQ_1lpaIF2_fPEVyipdQrIeaEANCFqKE";
+
 webpush.setVapidDetails(
   'mailto:admin@skillconnect.app',
-  process.env.VAPID_PUBLIC_KEY,
-  process.env.VAPID_PRIVATE_KEY
+  publicKey,
+  privateKey
 );
 
 export async function POST(request) {
@@ -17,13 +26,17 @@ export async function POST(request) {
       process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
     );
 
-    // Get all subscriptions for the target user
     const { data: subs } = await sb.from('push_subscriptions')
       .select('*').eq('user_id', targetUserId);
 
     if (!subs?.length) return Response.json({ ok: true, sent: 0 });
 
-    const payload = JSON.stringify({ title, body, url: url || '/chat', icon: icon || '/icon-192.png' });
+    const payload = JSON.stringify({
+      title,
+      body,
+      url: url || '/chat',
+      icon: icon || '/icon-192.png'
+    });
 
     const results = await Promise.allSettled(subs.map(sub =>
       webpush.sendNotification(
@@ -32,16 +45,20 @@ export async function POST(request) {
       )
     ));
 
-    // Remove expired subscriptions
     const expired = subs.filter((_, i) =>
       results[i].status === 'rejected' && results[i].reason?.statusCode === 410
     );
+
     if (expired.length) {
       await sb.from('push_subscriptions')
         .delete().in('endpoint', expired.map(s => s.endpoint));
     }
 
-    return Response.json({ ok: true, sent: results.filter(r => r.status === 'fulfilled').length });
+    return Response.json({
+      ok: true,
+      sent: results.filter(r => r.status === 'fulfilled').length
+    });
+
   } catch (e) {
     return Response.json({ error: e.message }, { status: 500 });
   }
