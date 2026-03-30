@@ -1,23 +1,24 @@
 import webpush from 'web-push';
 import { createClient } from '@supabase/supabase-js';
 
-// ✅ FIX: fallback keys add ki
-const publicKey =
-  process.env.VAPID_PUBLIC_KEY ||
-  "BMdap9TiD7XZPHiTgHmwiUT-6l-RhsNziUpbBa4M6IR2C74ONXtGZ3sB1n1h6wmdbftDo0gg7UKRIbksWZiuDck";
-
-const privateKey =
-  process.env.VAPID_PRIVATE_KEY ||
-  "8bWAahauFu9BQ_1lpaIF2_fPEVyipdQrIeaEANCFqKE";
-
-webpush.setVapidDetails(
-  'mailto:admin@skillconnect.app',
-  publicKey,
-  privateKey
-);
-
 export async function POST(request) {
   try {
+
+    // ✅ YAHI DALNA HAI (IMPORTANT)
+    const publicKey =
+      process.env.VAPID_PUBLIC_KEY ||
+      "BMdap9TiD7XZPHiTgHmwiUT-6l-RhsNziUpbBa4M6IR2C74ONXtGZ3sB1n1h6wmdbftDo0gg7UKRIbksWZiuDck";
+
+    const privateKey =
+      process.env.VAPID_PRIVATE_KEY ||
+      "8bWAahauFu9BQ_1lpaIF2_fPEVyipdQrIeaEANCFqKE";
+
+    webpush.setVapidDetails(
+      'mailto:admin@skillconnect.app',
+      publicKey,
+      privateKey
+    );
+
     const { targetUserId, title, body, url, icon } = await request.json();
     if (!targetUserId) return Response.json({ error: 'Missing targetUserId' }, { status: 400 });
 
